@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.classList.add('js')</script>
+<title>MidasFi — a gold distribution protocol on Robinhood Chain</title>
+<meta name="description" content="A 1% share of every trade is collected in WETH, spent on tokenized gold, and distributed to holders every 15 minutes. Pre-launch — contracts are not yet deployed.">
+<link rel="icon" href="assets/logo/mark-trim.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MidasFi — a gold distribution protocol on Robinhood Chain">
+<meta property="og:description" content="A 1% share of every trade, collected in WETH, spent on tokenized gold, and distributed to holders every 15 minutes.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MidasFi — a gold distribution protocol on Robinhood Chain">
+<meta name="twitter:description" content="A 1% share of every trade, collected in WETH, spent on tokenized gold, and distributed to holders every 15 minutes.">
+<!-- Vercel Analytics. The @vercel/analytics npm package is a React/Next
+     wrapper and is inert in a static page, so the script is loaded directly.
+     It only reports once deployed on Vercel; locally the request 404s harmlessly. -->
+<script defer src="/_vercel/insights/script.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Light theme. The hero uses the client's supplied gradient, sampled
+     pixel-for-pixel from assets/logo/Sample.png. Every text/background pair
+     below was measured for contrast, not estimated. */
+  --bg:#FFFFFF;
+  --surface:#FAF8F4;
+  --surface-2:#F3F0EA;
+  --line:#E7E2D9;
+  --line-hi:#D6CFC2;
+  --text:#14110C;
+  --muted:#5C5549;          /* 7.37:1 on white */
+  --muted-2:#6B6458;        /* 5.85:1 on white */
+  --gold:#E5B23E;           /* filled surfaces only - never text */
+  --gold-ink:#7A5C1B;       /* 6.22:1 on white - gold TEXT uses this */
+  --gold-line:#A8791E;      /* chart stroke, clears 3:1 on white */
+  --gold-hi:#F5C95E;
+  --gold-dim:#C89A5C;
+  --pos:#1E7A46;
+
+  /* sampled from Sample.png */
+  --hero-light:#FFE0A7;
+  --hero-mid:#E4BB79;
+  --hero-deep:#C89A5C;
+  --hero-ink:#14110C;       /* 7.38:1 on the deepest part of the gradient */
+  --hero-muted:#3B3020;     /* 5.05:1 on the deepest part */
+  --nav-h:68px;
+  --r:12px;
+  --ease:cubic-bezier(.22,.68,.28,1);
+  --shell:1200px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Manrope',system-ui,-apple-system,sans-serif;
+  font-size:16px;line-height:1.6;background:var(--bg);color:var(--text);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+img{display:block;max-width:100%}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
+
+/* anchor targets must clear the fixed nav — [id] fixes visual clipping,
+   the focusable rule fixes WCAG 2.4.11 focus-obscured */
+[id]{scroll-margin-top:calc(var(--nav-h) + 20px)}
+a,button,summary,[tabindex]{scroll-margin-top:calc(var(--nav-h) + 20px)}
+
+.shell{width:100%;max-width:var(--shell);margin:0 auto;padding-inline:clamp(18px,4vw,40px)}
+.band{padding-block:clamp(56px,6vw,92px)}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.tag{
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);
+}
+h1,h2,h3{font-weight:700;letter-spacing:-.035em;line-height:1.03}
+h1{font-size:clamp(36px,6.2vw,76px);letter-spacing:-.042em}
+h2{font-size:clamp(30px,4.4vw,54px)}
+h3{font-size:19px;letter-spacing:-.024em;line-height:1.25}
+.sub{color:var(--muted);font-size:clamp(16px,1.5vw,18.5px);line-height:1.55}
+
+/* ── logo chip: the client's real mark, mounted on the palette off-white ── */
+.brand{display:inline-flex;align-items:center;gap:11px}
+.chip{
+  width:32px;height:32px;border-radius:8px;background:#FFFFFF;
+  display:grid;place-items:center;flex-shrink:0;padding:5px;
+  box-shadow:0 0 0 1px rgba(20,17,12,.12);
+}
+.chip img{width:100%;height:100%;object-fit:contain}
+.brand b{font-size:16px;font-weight:800;letter-spacing:-.02em}
+
+/* ── nav ────────────────────────────────────────────── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:80;
+  border-bottom:1px solid transparent;transition:border-color .3s var(--ease),background .3s var(--ease);
+}
+.nav.stuck,.nav.menu-open{
+  background:rgba(255,255,255,.82);border-bottom-color:var(--line);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+}
+.nav-in{display:flex;align-items:center;gap:16px;height:var(--nav-h)}
+.nav-links{display:flex;gap:4px;margin-left:36px}
+.nav-links a{
+  font-size:14px;font-weight:500;color:var(--muted);padding:8px 13px;border-radius:8px;
+  transition:color .2s var(--ease),background .2s var(--ease);
+}
+.nav-links a:hover{color:var(--text);background:rgba(20,17,12,.05)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.pill{
+  display:inline-flex;align-items:center;gap:9px;height:38px;padding:0 14px;
+  border:1px solid var(--line);border-radius:9px;background:var(--surface);
+}
+.pill .tag{font-size:9.5px;letter-spacing:.14em}
+.pill .v{font-family:'IBM Plex Mono',monospace;font-size:13.5px;font-weight:500;font-variant-numeric:tabular-nums}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+@media (prefers-reduced-motion:no-preference){
+  .dot{animation:blip 2.4s var(--ease) infinite}
+  @keyframes blip{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(229,178,62,.5)}50%{opacity:.5;box-shadow:0 0 0 5px rgba(229,178,62,0)}}
+}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;height:42px;padding:0 20px;
+  border-radius:9px;font-size:14px;font-weight:700;letter-spacing:-.01em;
+  transition:transform .2s var(--ease),box-shadow .25s var(--ease),background .2s var(--ease);
+}
+.btn-gold{background:var(--gold);color:#100C04;box-shadow:0 0 0 0 rgba(229,178,62,.4)}
+a.btn-gold:hover{background:var(--gold-hi);transform:translateY(-1px);box-shadow:0 8px 26px -8px rgba(229,178,62,.6)}
+.btn-gold[aria-disabled="true"]{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.btn-ghost{border:1px solid var(--line-hi);color:var(--text)}
+a.btn-ghost:hover{background:rgba(20,17,12,.04);transform:translateY(-1px)}
+.btn .ar{transition:transform .2s var(--ease)}
+a.btn:hover .ar{transform:translateX(3px)}
+.btn-ink{background:var(--hero-ink);color:#FFF6E2}
+a.btn-ink:hover{background:#2A2318;transform:translateY(-1px);box-shadow:0 8px 26px -10px rgba(20,17,12,.6)}
+.btn-onGold{border:1px solid rgba(20,17,12,.3);color:var(--hero-ink)}
+a.btn-onGold:hover{background:rgba(255,255,255,.35);transform:translateY(-1px)}
+.nav-burger{display:none;width:44px;height:44px;place-items:center;border:1px solid var(--line);border-radius:9px}
+.nav-burger[aria-expanded="true"]{border-color:var(--line-hi);background:rgba(20,17,12,.05)}
+
+/* mobile menu panel — sits outside .nav-in so it spans the full bar */
+.nav-menu{
+  position:absolute;top:var(--nav-h);left:0;right:0;display:none;
+  background:rgba(255,255,255,.94);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+  padding:8px clamp(18px,4vw,40px) 16px;
+}
+.nav-menu a{
+  display:block;padding:14px 2px;font-size:15px;font-weight:500;color:var(--muted);
+  border-bottom:1px solid var(--line);transition:color .2s var(--ease);
+}
+.nav-menu a:last-child{border-bottom:none}
+.nav-menu a:hover,.nav-menu a:focus-visible{color:var(--gold-ink)}
+.nav.menu-open .nav-menu{display:block}
+@media (min-width:1001px){.nav-menu{display:none!important}}
+
+/* ── hero ───────────────────────────────────────────── */
+.hero{
+  position:relative;padding-block:clamp(128px,16vw,196px) clamp(56px,7vw,88px);
+  overflow:hidden;color:var(--hero-ink);
+  /* the client's supplied sample, rebuilt from its own measured stops */
+  background:linear-gradient(108deg,
+    #FFE0A7 0%, #F3CD8F 20%, #E4BB79 50%, #CC9F5E 80%, #C89A5C 100%);
+}
+.glow{
+  position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(90% 60% at 12% -10%, rgba(255,255,255,.30), transparent 60%);
+}
+@media (prefers-reduced-motion:no-preference){
+  .glow{animation:breathe 18s ease-in-out infinite alternate}
+  @keyframes breathe{from{opacity:.72}to{opacity:1}}
+}
+.hero-in{position:relative;z-index:1}
+.badge{
+  display:inline-flex;align-items:center;gap:9px;padding:7px 13px;
+  border:1px solid rgba(20,17,12,.22);border-radius:100px;
+  background:rgba(255,255,255,.34);color:var(--hero-muted);
+}
+.badge .dot{background:var(--hero-ink)}
+.hero h1{margin:26px 0 22px;max-width:15ch;display:flow-root}
+.hero h1 .g{color:#51370B}
+.hero .sub{max-width:52ch;margin-bottom:38px;color:var(--hero-muted)}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px}
+
+/* headline reveal — the mask is enlarged at the bottom so descenders clear */
+.rise{display:block;overflow:hidden;padding-bottom:.16em;margin-bottom:-.16em}
+.rise > span{display:block}
+html.js .rise > span{transform:translateY(125%);animation:riseUp .95s var(--ease) forwards}
+html.js .rise:nth-of-type(2) > span{animation-delay:.09s}
+@keyframes riseUp{to{transform:translateY(0)}}
+html.js .fade-in{opacity:0;animation:fadeUp .8s var(--ease) forwards}
+.d1{animation-delay:.34s}.d2{animation-delay:.44s}.d3{animation-delay:.54s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ── stat strip ─────────────────────────────────────── */
+.stats{
+  position:relative;z-index:1;margin-top:clamp(48px,6vw,74px);
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid rgba(20,17,12,.10);border-radius:var(--r);
+  background:rgba(255,255,255,.62);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  overflow:hidden;box-shadow:0 12px 34px -18px rgba(72,50,14,.45);
+}
+.stat{padding:26px 24px;border-right:1px solid rgba(20,17,12,.10);transition:background .25s var(--ease)}
+.stat:last-child{border-right:none}
+.stat:hover{background:rgba(255,255,255,.5)}
+.stat .v{font-size:clamp(24px,2.5vw,31px);font-weight:800;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.stat .v.g{color:#51370B}
+.stat .k{display:block;margin-top:11px}
+.stats-note{
+  position:relative;z-index:1;margin-top:14px;font-size:12.5px;color:var(--hero-muted);
+}
+
+/* ── ticker ─────────────────────────────────────────── */
+.ticker{border-block:1px solid var(--line);background:var(--surface);overflow:hidden;padding:14px 0}
+.ticker-track{display:flex;gap:0;width:max-content}
+@media (prefers-reduced-motion:no-preference){
+  html.js .ticker-track{animation:slide var(--tkr-dur,42s) linear infinite}
+  .ticker:hover .ticker-track{animation-play-state:paused}
+  @keyframes slide{from{transform:translateX(0)}to{transform:translateX(calc(-1 * var(--tkr-copy,50%)))}}
+}
+.tick{
+  display:inline-flex;align-items:center;gap:11px;padding:0 26px;
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--muted);white-space:nowrap;
+  border-right:1px solid var(--line);
+}
+.tick b{color:var(--gold-ink);font-weight:500}
+.tick .sm{color:var(--muted-2);font-size:11px}
+.tick.lead{color:var(--muted-2);letter-spacing:.18em;font-size:10.5px}
+
+/* ── section head ───────────────────────────────────── */
+.head{max-width:660px;margin-bottom:clamp(36px,4.4vw,56px)}
+.head h2{margin:16px 0 18px}
+.head .sub{font-size:17px}
+
+/* ── steps ──────────────────────────────────────────── */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.step{
+  position:relative;padding:28px 24px 30px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  transition:border-color .3s var(--ease),transform .3s var(--ease),background .3s var(--ease);
+}
+.step::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0;transition:opacity .35s var(--ease);
+}
+.step:hover{border-color:var(--line-hi);transform:translateY(-4px);background:var(--surface-2)}
+.step:hover::before{opacity:.85}
+.step .n{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold-ink);
+  letter-spacing:.16em;margin-bottom:22px;display:block;
+}
+.step h3{margin-bottom:10px}
+.step p{font-size:14.5px;color:var(--muted);line-height:1.55}
+.step .meta{
+  margin-top:20px;padding-top:15px;border-top:1px solid var(--line);
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-2);letter-spacing:.06em;
+}
+
+/* ── asset ──────────────────────────────────────────── */
+.asset{display:grid;grid-template-columns:1fr 1.06fr;gap:clamp(28px,4vw,56px);align-items:center}
+.asset-copy h2{margin:16px 0 20px;max-width:12ch}
+.asset-copy p{color:var(--muted);margin-bottom:16px;max-width:46ch;font-size:16px}
+.asset-copy .fine{font-size:14px;color:var(--muted)}
+.chart-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:clamp(22px,2.6vw,30px);position:relative;overflow:hidden;
+}
+.chart-card::after{
+  content:"";position:absolute;top:-60%;right:-30%;width:80%;height:150%;
+  background:radial-gradient(circle,rgba(229,178,62,.12),transparent 65%);pointer-events:none;
+}
+.cc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;position:relative;margin-bottom:26px}
+.cc-tkr{display:flex;align-items:center;gap:12px}
+.cc-badge{
+  width:40px;height:40px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(150deg,var(--gold-hi),var(--gold) 55%,#A67B22);
+  display:grid;place-items:center;font-size:11px;font-weight:800;color:#140F04;letter-spacing:-.02em;
+}
+.cc-tkr b{display:block;font-size:15px;font-weight:700;letter-spacing:-.02em}
+.cc-tkr span{font-size:12.5px;color:var(--muted-2)}
+.cc-price{text-align:right}
+.cc-price .p{font-size:26px;font-weight:800;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.cc-price .c{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--pos);margin-top:3px}
+.chart{position:relative}
+.chart svg{width:100%;height:170px;display:block;overflow:visible}
+.chart .ln{
+  fill:none;stroke:var(--gold-line);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:var(--len,600);stroke-dashoffset:0;
+}
+html.js .chart .ln{stroke-dashoffset:var(--len,600)}
+html.js .chart.drawn .ln{transition:stroke-dashoffset 1.7s var(--ease);stroke-dashoffset:0}
+.chart .ar{fill:url(#gg);opacity:1}
+html.js .chart .ar{opacity:0;transition:opacity .9s var(--ease) .7s}
+html.js .chart.drawn .ar{opacity:1}
+.cc-axis{display:flex;justify-content:space-between;margin-top:14px;position:relative}
+.cc-axis span{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted-2)}
+.cc-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-radius:10px;overflow:hidden;margin-top:26px;position:relative}
+.cc-facts > div{background:var(--surface-2);padding:15px 16px}
+.cc-facts .v{font-size:14px;font-weight:700;margin-top:7px;letter-spacing:-.015em}
+
+/* ── fee cards ──────────────────────────────────────── */
+.fee{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.fcard{
+  position:relative;padding:30px 26px 32px;border:1px solid var(--line);border-radius:var(--r);
+  background:var(--surface);transition:border-color .3s var(--ease),transform .3s var(--ease);
+}
+.fcard:hover{border-color:var(--line-hi);transform:translateY(-4px)}
+.fcard.hi{border-color:var(--gold-dim);background:linear-gradient(180deg,rgba(229,178,62,.06),transparent 60%),var(--surface)}
+/* signature motif: the logo's hard right-angle, drawn as a gold corner rule */
+.fcard.hi::before{
+  content:"";position:absolute;top:-1px;left:-1px;width:34px;height:34px;
+  border-top:1px solid var(--gold-line);border-left:1px solid var(--gold-line);
+  border-top-left-radius:var(--r);pointer-events:none;
+}
+.fcard h3{margin:16px 0 12px;font-size:17px}
+.fcard.hi h3{color:var(--gold-ink)}
+.fcard p{font-size:14.5px;color:var(--muted);line-height:1.6}
+
+/* ── feed ───────────────────────────────────────────── */
+.feed{position:relative;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.feed::before{
+  content:"";position:absolute;top:-1px;left:-1px;width:34px;height:34px;
+  border-top:1px solid var(--gold-line);border-left:1px solid var(--gold-line);
+  border-top-left-radius:var(--r);pointer-events:none;z-index:2;
+}
+.feed-top{
+  display:flex;align-items:center;gap:12px;padding:16px 22px;
+  border-bottom:1px solid var(--line);background:var(--surface-2);flex-wrap:wrap;
+}
+.feed-top b{font-size:14px;font-weight:700}
+.feed-top .spacer{margin-left:auto}
+.fhead,.frow{display:grid;grid-template-columns:150px minmax(0,1fr) 130px 110px;gap:18px;align-items:center}
+.fhead{padding:12px 22px;border-bottom:1px solid var(--line)}
+.frow{padding:16px 22px;border-bottom:1px solid var(--line);transition:background .2s var(--ease)}
+.frow:last-child{border-bottom:none}
+.frow:hover{background:var(--surface-2)}
+.frow.fresh{animation:flash 2.4s var(--ease)}
+@keyframes flash{0%{background:rgba(229,178,62,.16)}100%{background:transparent}}
+.f-t{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--muted)}
+.f-amt{display:flex;align-items:baseline;gap:9px}
+.f-amt b{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:500;color:var(--gold-ink)}
+.f-amt span{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-2);letter-spacing:.08em}
+.f-v,.f-w{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ── faq ────────────────────────────────────────────── */
+.faq{max-width:840px}
+.q{border-bottom:1px solid var(--line)}
+.q:first-child{border-top:1px solid var(--line)}
+.q button{width:100%;display:flex;align-items:center;gap:20px;padding:22px 2px;text-align:left}
+.q button span:first-child{font-size:17px;font-weight:600;letter-spacing:-.02em;transition:color .2s var(--ease)}
+.q button:hover span:first-child{color:var(--gold-ink)}
+.q .ic{margin-left:auto;width:15px;height:15px;position:relative;flex-shrink:0}
+.q .ic::before,.q .ic::after{content:"";position:absolute;top:50%;left:50%;background:var(--muted);transform:translate(-50%,-50%);transition:background .2s var(--ease)}
+.q .ic::before{width:15px;height:1.5px}
+.q .ic::after{width:1.5px;height:15px;transition:transform .32s var(--ease)}
+.q.open .ic::after{transform:translate(-50%,-50%) scaleY(0)}
+.q.open .ic::before{background:var(--gold-ink)}
+/* visibility:hidden pulls collapsed answers out of the a11y tree and tab order,
+   while preserving layout so scrollHeight still measures correctly */
+.q .a{max-height:0;overflow:hidden;visibility:hidden;transition:max-height .38s var(--ease),visibility 0s linear .38s}
+.q.open .a{visibility:visible;transition:max-height .38s var(--ease),visibility 0s}
+.q .a p{padding:0 40px 24px 2px;color:var(--muted);font-size:15.5px;line-height:1.65}
+
+/* ── cta ────────────────────────────────────────────── */
+.cta{
+  position:relative;border:1px solid var(--line);border-radius:18px;background:var(--surface);
+  padding:clamp(48px,6.5vw,84px) clamp(26px,4vw,56px);text-align:center;overflow:hidden;
+}
+.cta::before{
+  content:"";position:absolute;top:-70%;left:50%;transform:translateX(-50%);
+  width:120%;height:180%;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(229,178,62,.16),transparent 60%);
+}
+.cta > *{position:relative}
+.cta h2{margin:18px auto 16px;max-width:16ch}
+.cta .sub{margin:0 auto 34px;max-width:44ch}
+.cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.cta-note{margin-top:20px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);letter-spacing:.08em}
+
+/* ── footer ─────────────────────────────────────────── */
+footer{border-top:1px solid var(--line);padding-block:56px 40px;margin-top:clamp(64px,7vw,110px)}
+.f-grid{display:grid;grid-template-columns:1.5fr repeat(2,auto);gap:36px 56px;margin-bottom:46px}
+.f-grid > div:first-child p{margin-top:16px;color:var(--muted);font-size:13.5px;max-width:32ch;line-height:1.55}
+.fc b{display:block;margin-bottom:15px}
+.fc a{display:block;font-size:14px;color:var(--muted);padding:5px 0;transition:color .2s var(--ease)}
+.fc a:hover{color:var(--gold-ink)}
+.legal{border-top:1px solid var(--line);padding-top:26px;font-size:13.5px;line-height:1.65;color:var(--muted);max-width:96ch}
+.legal-row{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;margin-top:24px}
+
+/* ── reveal (JS-gated so the page is readable without JS) ── */
+.rv{transition:opacity .75s var(--ease),transform .75s var(--ease)}
+html.js .rv{opacity:0;transform:translateY(20px)}
+html.js .rv.in{opacity:1;transform:none}
+html.js .rv.in .step,html.js .rv.in .fcard{animation:pop .6s var(--ease) backwards}
+html.js .rv.in .step:nth-child(2),html.js .rv.in .fcard:nth-child(2){animation-delay:.08s}
+html.js .rv.in .step:nth-child(3),html.js .rv.in .fcard:nth-child(3){animation-delay:.16s}
+html.js .rv.in .step:nth-child(4){animation-delay:.24s}
+@keyframes pop{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* ── responsive ─────────────────────────────────────── */
+@media (max-width:1000px){
+  .nav-links{display:none}
+  .nav-burger{display:grid}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat:nth-child(2){border-right:none}
+  .stat:nth-child(-n+2){border-bottom:1px solid rgba(20,17,12,.10)}
+  .steps{grid-template-columns:1fr 1fr}
+  .asset{grid-template-columns:1fr;gap:34px}
+  .fee{grid-template-columns:1fr}
+  .f-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:680px){
+  .nav-right .pill{display:none}
+  .stats{grid-template-columns:1fr}
+  .stat{border-right:none;border-bottom:1px solid rgba(20,17,12,.10)}
+  .stat:last-child{border-bottom:none}
+  .steps{grid-template-columns:1fr}
+  .fhead{display:none}
+  .frow{grid-template-columns:1fr auto;gap:6px 16px;padding:15px 18px}
+  .f-t{grid-column:1/-1;font-size:11.5px;color:var(--muted-2)}
+  .f-v{text-align:right}
+  .f-w{grid-column:1/-1;font-size:12px}
+  .cc-facts{grid-template-columns:1fr}
+  .f-grid{grid-template-columns:1fr}
+  .q .a p{padding-right:0}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+  html.js .rv{opacity:1;transform:none}
+  html.js .rise > span{transform:none}
+  html.js .fade-in{opacity:1}
+  html.js .chart .ln{stroke-dashoffset:0}
+  html.js .chart .ar{opacity:1}
+}
+</style>
+</head>
+<body>
+
+<!-- ── nav ─────────────────────────────────────────── -->
+<nav class="nav" id="nav">
+  <div class="shell nav-in">
+    <a href="#top" class="brand">
+      <span class="chip"><img src="assets/logo/mark-trim.png" alt=""></span>
+      <b>MidasFi</b>
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#asset">The asset</a>
+      <a href="#where">Your gold</a>
+      <a href="#feed">Distributions</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-right">
+      <span class="pill"><span class="dot"></span><span class="tag">Interval</span><span class="v" id="clock">15:00</span></span>
+      <a href="#buy" class="btn btn-gold">Buy MidasFi</a>
+      <button class="nav-burger" id="burger" aria-label="Menu" aria-expanded="false" aria-controls="navmenu">
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1 1h14M1 10h14"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="nav-menu" id="navmenu">
+    <a href="#how">How it works</a>
+    <a href="#asset">The asset</a>
+    <a href="#feed">Distributions</a>
+    <a href="#faq">FAQ</a>
+  </div>
+</nav>
+
+<main id="top">
+
+<!-- ── hero ────────────────────────────────────────── -->
+<section class="hero">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="shell hero-in">
+    <span class="badge tag fade-in"><span class="dot"></span> Pre-launch — contracts not yet deployed</span>
+
+    <h1>
+      <span class="rise"><span>Get paid in gold,</span></span>
+      <span class="rise"><span class="g">every 15 minutes.</span></span>
+    </h1>
+
+    <p class="sub fade-in d1">Trades carry a 2% fee. Half of it — 1% of every trade — is collected in WETH, spent on tokenized gold, and pushed straight to holders. Nothing to claim. Nothing to stake.</p>
+
+    <div class="hero-cta fade-in d2">
+      <a href="#buy" class="btn btn-ink">Buy MidasFi <span class="ar">→</span></a>
+      <a href="#how" class="btn btn-onGold">See how it works</a>
+    </div>
+
+    <div class="stats fade-in d3">
+      <div class="stat">
+        <div class="v g" data-to="1" data-suf="%" data-dec="0">1%</div>
+        <span class="k tag">Of every trade to holders</span>
+      </div>
+      <div class="stat">
+        <div class="v" data-to="15" data-suf=" min" data-dec="0">15 min</div>
+        <span class="k tag">Distribution interval</span>
+      </div>
+      <div class="stat">
+        <div class="v" data-to="50000" data-dec="0">50,000</div>
+        <span class="k tag">MidasFi to qualify</span>
+      </div>
+      <div class="stat">
+        <div class="v" data-to="100" data-suf="%" data-dec="0">100%</div>
+        <span class="k tag">Of fees into PAXG</span>
+      </div>
+    </div>
+    <p class="stats-note">Fixed protocol parameters. No distributions have occurred yet.</p>
+  </div>
+</section>
+
+<!-- ── ticker ──────────────────────────────────────── -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track" id="ticker"><span class="tick lead">EXAMPLE PAYOUTS</span><span class="tick"><b>0.2367 PAXG</b><span class="sm">$949</span><span class="sm">→ 1,184 wallets</span></span><span class="tick"><b>0.0990 PAXG</b><span class="sm">$397</span><span class="sm">→ 1,186 wallets</span></span><span class="tick"><b>0.2849 PAXG</b><span class="sm">$1,142</span><span class="sm">→ 1,186 wallets</span></span><span class="tick"><b>0.0808 PAXG</b><span class="sm">$324</span><span class="sm">→ 1,191 wallets</span></span><span class="tick"><b>0.1716 PAXG</b><span class="sm">$688</span><span class="sm">→ 1,193 wallets</span></span><span class="tick"><b>0.1442 PAXG</b><span class="sm">$578</span><span class="sm">→ 1,197 wallets</span></span><span class="tick"><b>0.3425 PAXG</b><span class="sm">$1,373</span><span class="sm">→ 1,201 wallets</span></span><span class="tick"><b>0.1232 PAXG</b><span class="sm">$494</span><span class="sm">→ 1,204 wallets</span></span></div>
+</div>
+
+<!-- ── how ─────────────────────────────────────────── -->
+<section class="shell band" id="how">
+  <div class="head rv">
+    <span class="tag">The mechanism</span>
+    <h2>How the gold reaches you.</h2>
+    <p class="sub">Fees are collected on Robinhood Chain. The gold is bought and sent on Ethereum. Every step, in order.</p>
+  </div>
+
+  <div class="steps rv">
+    <article class="step">
+      <span class="n">01</span>
+      <h3>Someone trades</h3>
+      <p>Every buy and sell runs through the Bags bonding curve, which graduates to a Uniswap v4 pool with permanently locked liquidity.</p>
+      <div class="meta">BAGS · ROBINHOOD CHAIN</div>
+    </article>
+    <article class="step">
+      <span class="n">02</span>
+      <h3>Bags takes 2%</h3>
+      <p>Split evenly: 1% to the Bags protocol, 1% to MidasFi. Taken in WETH, so no MidasFi is ever sold to pay you. It accrues in this token's Bags fee-share contract until claimed.</p>
+      <div class="meta">1% TO MIDASFI · IN WETH</div>
+    </article>
+    <article class="step">
+      <span class="n">03</span>
+      <h3>The fees buy gold</h3>
+      <p>The claimed WETH buys PAX Gold, real and vaulted, one ounce per token. One asset, no discretion about what gets bought.</p>
+      <div class="meta">100% INTO PAXG</div>
+    </article>
+    <article class="step">
+      <span class="n">04</span>
+      <h3>Holders get paid</h3>
+      <p>Every wallet holding 50,000 MidasFi or more gets a pro-rata share, sent to that same wallet address on Ethereum. You never claim anything.</p>
+      <div class="meta">EVERY 15 MIN</div>
+    </article>
+  </div>
+
+  <p class="rv" style="margin-top:26px;font-size:14px;color:var(--muted-2);max-width:74ch">Worth being precise: the fee collection is automatic and on-chain, but claiming the fees, buying the gold and sending it out are operated steps run each cycle. The gold leg lives on Ethereum rather than Robinhood Chain, so it cannot be a single self-executing contract. What holders never have to do is claim anything.</p>
+</section>
+
+<!-- ── asset ───────────────────────────────────────── -->
+<section class="shell band" id="asset">
+  <div class="asset">
+    <div class="asset-copy rv">
+      <span class="tag">What you receive</span>
+      <h2>One asset. Nothing else.</h2>
+      <p>PAX Gold is issued by Paxos, a New York State regulated trust company. One PAXG is one fine troy ounce of a London Good Delivery bar sitting in a professional vault in London — not an index, not a derivative, an actual serial-numbered bar.</p>
+      <p>The treasury buys PAXG on-chain and you receive exactly what it bought. Nothing is wrapped, synthesised, or IOU'd on the way to your wallet. You can look up the serial number and weight of the bar backing your holding on Paxos's own site.</p>
+      <p class="fine">Worth stating plainly: PAXG is redeemable for physical gold through Paxos, but only in whole-bar quantities — around 400 ounces. Below that you hold it, trade it, or sell it for cash like any other token.</p>
+    </div>
+
+    <div class="chart-card rv">
+      <div class="cc-top">
+        <div class="cc-tkr">
+          <span class="cc-badge">PAXG</span>
+          <span>
+            <b>PAX Gold</b>
+            <span>Paxos · Ethereum mainnet</span>
+          </span>
+        </div>
+        <div class="cc-price">
+          <div class="p">$4,008.73</div>
+          <div class="c">+0.07% · 24H</div>
+          <div class="tag" style="margin-top:6px">Spot, 18 Jul 2026</div>
+        </div>
+      </div>
+
+      <div class="chart" id="chart">
+        <svg viewBox="0 0 460 170" preserveAspectRatio="none" role="img" aria-label="Illustrative price chart">
+          <defs>
+            <linearGradient id="gg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#A8791E" stop-opacity=".22"/>
+              <stop offset="100%" stop-color="#A8791E" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="ar" d="M0.0,150.0 C7.0,150.0 7.0,146.1 13.9,146.1 C20.9,146.1 20.9,144.6 27.9,144.6 C34.8,144.6 34.8,151.1 41.8,151.1 C48.8,151.1 48.8,140.1 55.8,140.1 C62.7,140.1 62.7,122.9 69.7,122.9 C76.7,122.9 76.7,122.3 83.6,122.3 C90.6,122.3 90.6,118.8 97.6,118.8 C104.5,118.8 104.5,108.1 111.5,108.1 C118.5,108.1 118.5,115.2 125.5,115.2 C132.4,115.2 132.4,126.7 139.4,126.7 C146.4,126.7 146.4,121.0 153.3,121.0 C160.3,121.0 160.3,118.8 167.3,118.8 C174.2,118.8 174.2,123.0 181.2,123.0 C188.2,123.0 188.2,109.3 195.2,109.3 C202.1,109.3 202.1,93.1 209.1,93.1 C216.1,93.1 216.1,94.5 223.0,94.5 C230.0,94.5 230.0,91.7 237.0,91.7 C243.9,91.7 243.9,83.4 250.9,83.4 C257.9,83.4 257.9,92.9 264.8,92.9 C271.8,92.9 271.8,102.9 278.8,102.9 C285.8,102.9 285.8,95.0 292.7,95.0 C299.7,95.0 299.7,92.1 306.7,92.1 C313.6,92.1 313.6,94.0 320.6,94.0 C327.6,94.0 327.6,78.3 334.5,78.3 C341.5,78.3 341.5,63.9 348.5,63.9 C355.5,63.9 355.5,67.6 362.4,67.6 C369.4,67.6 369.4,65.6 376.4,65.6 C383.3,65.6 383.3,59.5 390.3,59.5 C397.3,59.5 397.3,70.5 404.2,70.5 C411.2,70.5 411.2,78.3 418.2,78.3 C425.2,78.3 425.2,68.1 432.1,68.1 C439.1,68.1 439.1,64.4 446.1,64.4 C453.0,64.4 453.0,64.3 460.0,64.3 L460,170 L0,170 Z"/>
+          <path class="ln" vector-effect="non-scaling-stroke" d="M0.0,150.0 C7.0,150.0 7.0,146.1 13.9,146.1 C20.9,146.1 20.9,144.6 27.9,144.6 C34.8,144.6 34.8,151.1 41.8,151.1 C48.8,151.1 48.8,140.1 55.8,140.1 C62.7,140.1 62.7,122.9 69.7,122.9 C76.7,122.9 76.7,122.3 83.6,122.3 C90.6,122.3 90.6,118.8 97.6,118.8 C104.5,118.8 104.5,108.1 111.5,108.1 C118.5,108.1 118.5,115.2 125.5,115.2 C132.4,115.2 132.4,126.7 139.4,126.7 C146.4,126.7 146.4,121.0 153.3,121.0 C160.3,121.0 160.3,118.8 167.3,118.8 C174.2,118.8 174.2,123.0 181.2,123.0 C188.2,123.0 188.2,109.3 195.2,109.3 C202.1,109.3 202.1,93.1 209.1,93.1 C216.1,93.1 216.1,94.5 223.0,94.5 C230.0,94.5 230.0,91.7 237.0,91.7 C243.9,91.7 243.9,83.4 250.9,83.4 C257.9,83.4 257.9,92.9 264.8,92.9 C271.8,92.9 271.8,102.9 278.8,102.9 C285.8,102.9 285.8,95.0 292.7,95.0 C299.7,95.0 299.7,92.1 306.7,92.1 C313.6,92.1 313.6,94.0 320.6,94.0 C327.6,94.0 327.6,78.3 334.5,78.3 C341.5,78.3 341.5,63.9 348.5,63.9 C355.5,63.9 355.5,67.6 362.4,67.6 C369.4,67.6 369.4,65.6 376.4,65.6 C383.3,65.6 383.3,59.5 390.3,59.5 C397.3,59.5 397.3,70.5 404.2,70.5 C411.2,70.5 411.2,78.3 418.2,78.3 C425.2,78.3 425.2,68.1 432.1,68.1 C439.1,68.1 439.1,64.4 446.1,64.4 C453.0,64.4 453.0,64.3 460.0,64.3"/>
+        </svg>
+        <div class="cc-axis"><span>30 DAYS AGO</span><span>TODAY</span></div>
+      </div>
+
+      <div class="cc-facts">
+        <div><span class="tag">Backing</span><div class="v">1 oz per token</div></div>
+        <div><span class="tag">Custodian</span><div class="v">Paxos, London</div></div>
+        <div><span class="tag">Live since</span><div class="v">2019</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── where the gold arrives ──────────────────────── -->
+<section class="shell band" id="where">
+  <div class="head rv">
+    <span class="tag">Where your gold arrives</span>
+    <h2>Two chains, one wallet.</h2>
+    <p class="sub">MidasFi trades on Robinhood Chain. PAX Gold lives on Ethereum. Your gold is sent to the <em>same wallet address</em> — just on the other network. Nothing is lost; you may simply be looking at the wrong chain.</p>
+  </div>
+
+  <div class="steps rv">
+    <article class="step">
+      <span class="n">01</span>
+      <h3>Switch your wallet to Ethereum</h3>
+      <p>Your address is identical on both networks, because both are controlled by the same key. Change the network selector from Robinhood Chain to Ethereum.</p>
+      <div class="meta">SAME ADDRESS · DIFFERENT NETWORK</div>
+    </article>
+    <article class="step">
+      <span class="n">02</span>
+      <h3>Add PAXG as a token</h3>
+      <p>Most wallets need the contract address before they will display a token. Paste this one in, on Ethereum:</p>
+      <div class="meta" style="word-break:break-all;line-height:1.5">0x45804880De22913dAFE09f4980848ECE6EcbAf78</div>
+    </article>
+    <article class="step">
+      <span class="n">03</span>
+      <h3>Or just check Etherscan</h3>
+      <p>Paste your wallet address into etherscan.io and open the token tab. Every distribution you have received shows up there, with the transaction that sent it.</p>
+      <div class="meta">ETHERSCAN.IO</div>
+    </article>
+  </div>
+
+  <p class="rv" style="margin-top:26px;font-size:14px;color:var(--muted-2);max-width:70ch">
+    Only ever add PAXG using the address above. Tokens copying the PAX Gold name exist on several
+    networks, and an address from anywhere other than Paxos or Etherscan should be assumed fake.
+  </p>
+</section>
+
+<!-- ── fee ─────────────────────────────────────────── -->
+<section class="shell band">
+  <div class="head rv">
+    <span class="tag">Fee design</span>
+    <h2>The fee is taken in WETH.</h2>
+    <p class="sub">Which means MidasFi is never sold to pay you. That one decision changes everything downstream.</p>
+  </div>
+
+  <div class="fee rv">
+    <article class="fcard">
+      <span class="tag">The usual way</span>
+      <h3>Sell the token to pay the yield</h3>
+      <p>Most distribution protocols collect fees in their own token, then dump it on the market to buy whatever they're paying out. Holders quietly fund their own dividend through the price.</p>
+    </article>
+    <article class="fcard hi">
+      <span class="tag">What happens here</span>
+      <h3>The hook collects ETH</h3>
+      <p>WETH is taken at the moment of the swap and routed directly into gold. The treasury has no reason to ever touch MidasFi supply.</p>
+    </article>
+    <article class="fcard">
+      <span class="tag">Why it matters</span>
+      <h3>No built-in sell pressure</h3>
+      <p>A protocol designed to hand you a hard asset shouldn't be creating constant pressure on the token you had to buy to qualify. Otherwise the two goals fight each other.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ── feed ────────────────────────────────────────── -->
+<section class="shell band" id="feed">
+  <div class="head rv">
+    <span class="tag">Distributions</span>
+    <h2>How payouts will settle.</h2>
+    <p class="sub">Each row will show the gold bought, what it cost, and how many wallets it reached.</p>
+  </div>
+
+  <div class="feed rv">
+    <div class="feed-top">
+      <span class="dot"></span>
+      <b>Example distributions</b>
+      <span class="spacer"></span>
+      <span class="tag">Illustrative — not live data</span>
+    </div>
+    <div role="table" aria-label="Example distribution history">
+      <div class="fhead" role="row">
+        <span class="tag" role="columnheader">Time</span>
+        <span class="tag" role="columnheader">Gold distributed</span>
+        <span class="tag" role="columnheader">Cost</span>
+        <span class="tag" role="columnheader">Wallets</span>
+      </div>
+      <div id="rows"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── faq ─────────────────────────────────────────── -->
+<section class="shell band" id="faq">
+  <div class="head rv">
+    <span class="tag">FAQ</span>
+    <h2>Before you buy.</h2>
+  </div>
+
+  <div class="faq rv">
+    <div class="q">
+      <button aria-expanded="false" aria-controls="faq-a1"><span>Who qualifies for a distribution?</span><span class="ic" aria-hidden="true"></span></button>
+      <div class="a" id="faq-a1"><p>Any wallet holding at least 50,000 MidasFi when a distribution fires. Your share is your balance measured against every other qualifying balance — nothing else weights it.</p></div>
+    </div>
+    <div class="q">
+      <button aria-expanded="false" aria-controls="faq-a2"><span>Do I need to claim or stake?</span><span class="ic" aria-hidden="true"></span></button>
+      <div class="a" id="faq-a2"><p>No. There is no claim button, no staking contract, and no lock-up. The distributor sends PAXG to that same wallet address on Ethereum. If you qualify when it fires, it lands.</p></div>
+    </div>
+    <div class="q">
+      <button aria-expanded="false" aria-controls="faq-a3"><span>What happens if I sell part of my balance?</span><span class="ic" aria-hidden="true"></span></button>
+      <div class="a" id="faq-a3"><p>Your share of future distributions shrinks proportionally. Drop below 50,000 MidasFi and you stop receiving them entirely until you're back above it. Gold already sent to you is yours and is never reversed.</p></div>
+    </div>
+    <div class="q">
+      <button aria-expanded="false" aria-controls="faq-a4"><span>Why do distribution sizes change?</span><span class="ic" aria-hidden="true"></span></button>
+      <div class="a" id="faq-a4"><p>Three things move it: trading volume decides how much WETH was collected, total qualifying supply decides how thinly it spreads, and the spot price of gold at purchase decides how much metal that WETH actually bought.</p></div>
+    </div>
+    <div class="q">
+      <button aria-expanded="false" aria-controls="faq-a5"><span>Is the interval exact?</span><span class="ic" aria-hidden="true"></span></button>
+      <div class="a" id="faq-a5"><p>It's a target, not a promise. Distributions execute on-chain and depend on block times and network conditions, so one can land slightly early or slightly late.</p></div>
+    </div>
+    <div class="q">
+      <button aria-expanded="false" aria-controls="faq-a6"><span>Can the parameters change?</span><span class="ic" aria-hidden="true"></span></button>
+      <div class="a" id="faq-a6"><p>The fee rate, qualifying threshold, and interval are on-chain parameters. Any change executes on-chain and is visible before it takes effect. The asset itself — PAXG — is fixed.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── cta ─────────────────────────────────────────── -->
+<section class="shell" id="buy">
+  <div class="cta rv">
+    <span class="tag">Get started</span>
+    <h2>Start earning gold.</h2>
+    <p class="sub">Hold 50,000 MidasFi and the next distribution includes you.</p>
+    <div class="cta-row">
+      <span class="btn btn-gold" aria-disabled="true">Buy MidasFi <span class="ar">→</span></span>
+      <a href="#how" class="btn btn-ghost">How it works</a>
+    </div>
+    <p class="cta-note">POOL GOES LIVE AT LAUNCH</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ── footer ──────────────────────────────────────── -->
+<footer>
+  <div class="shell">
+    <div class="f-grid">
+      <div>
+        <a href="#top" class="brand">
+          <span class="chip"><img src="assets/logo/mark-trim.png" alt=""></span>
+          <b>MidasFi</b>
+        </a>
+        <p>A gold distribution protocol for Robinhood Chain's tokenized assets.</p>
+      </div>
+      <div class="fc">
+        <b class="tag">Protocol</b>
+        <a href="#buy">Buy MidasFi</a>
+        <a href="#feed">Distributions</a>
+        <a href="#how">How it works</a>
+      </div>
+      <div class="fc">
+        <b class="tag">Resources</b>
+        <a href="#asset">The asset</a>
+        <a href="#where">Where your gold arrives</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </div>
+
+    <p class="legal">MidasFi is not yet deployed — no contracts are live, no distributions have occurred, and every figure on this page is illustrative. Informational only. Nothing here is financial, legal, tax, or investment advice. Distributions are tokenized gold shares, not brokerage shares, and carry no voting rights or dividends. PAXG is redeemable for physical gold through Paxos only in whole-bar quantities of roughly 400 ounces; below that it is held, traded or sold for cash. Liquidity may be limited and prices can move materially against you. Every swap carries a 2% fee — 1% to the Bags protocol and 1% funding these distributions — plus LP fees, shown in the quote before you confirm. You may lose the entire value of your position; illustrative distributions are not a forecast or a promise of future returns.</p>
+
+    <div class="legal-row">
+      <span class="tag">© 2026 MidasFi</span>
+      <span class="tag">Bags · Robinhood Chain</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var INTERVAL = 15 * 60;                       // seconds between distributions
+  var due = Date.now() + INTERVAL * 1000;       // wall-clock instant the next one fires
+  var seq = 2847;
+
+  function pad(v){ return (v < 10 ? '0' : '') + v; }
+  function stampOf(d){ return pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()) + ' UTC'; }
+
+  /* ── nav: scrolled state + mobile menu ── */
+  var nav = document.getElementById('nav');
+  var burger = document.getElementById('burger');
+  function onScroll(){ nav.classList.toggle('stuck', window.scrollY > 8); }
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive:true });
+
+  function setMenu(open){
+    nav.classList.toggle('menu-open', open);
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  if (burger){
+    burger.addEventListener('click', function(){
+      setMenu(!nav.classList.contains('menu-open'));
+    });
+    var menu = document.getElementById('navmenu');
+    menu.addEventListener('click', function(e){
+      if (e.target.closest('a')) setMenu(false);
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && nav.classList.contains('menu-open')){
+        setMenu(false);
+        burger.focus();
+      }
+    });
+    // widening past the breakpoint force-hides the panel; clear the state with it
+    var wide = window.matchMedia('(min-width:1001px)');
+    var onWide = function(e){ if (e.matches) setMenu(false); };
+    if (wide.addEventListener) wide.addEventListener('change', onWide);
+    else if (wide.addListener) wide.addListener(onWide);
+  }
+
+  /* ── ticker: translate by an exact measured copy width so the loop is
+        seamless at any monitor width, and emit enough copies to fill it ── */
+  var tk = document.getElementById('ticker');
+  if (tk && !reduce){
+    var oneCopy = tk.innerHTML;
+    var rebuildT;
+    function buildTicker(){
+      tk.innerHTML = oneCopy;
+      var copyW = tk.scrollWidth;
+      if (!copyW) return;
+      var copies = Math.max(2, Math.ceil(window.innerWidth / copyW) + 1);
+      var html = '';
+      for (var i = 0; i < copies; i++) html += oneCopy;
+      tk.innerHTML = html;
+      tk.style.setProperty('--tkr-copy', copyW + 'px');
+      tk.style.setProperty('--tkr-dur', (copyW / 50) + 's');
+    }
+    buildTicker();
+    window.addEventListener('resize', function(){
+      clearTimeout(rebuildT);
+      rebuildT = setTimeout(buildTicker, 200);
+    });
+  }
+
+  /* ── chart: measure the real path length so the draw-on runs its full 1.7s ── */
+  var chart = document.getElementById('chart');
+  if (chart){
+    var lnEl = chart.querySelector('.ln');
+    if (lnEl && lnEl.getTotalLength){
+      chart.style.setProperty('--len', lnEl.getTotalLength());
+    }
+  }
+
+  /* ── distribution rows, all stamped off the same `due` anchor ── */
+  var seedVals = [
+    ['0.2367','$949','1,184'],['0.0990','$397','1,186'],['0.2849','$1,142','1,186'],
+    ['0.0808','$324','1,191'],['0.1716','$688','1,193'],['0.1442','$578','1,197']
+  ];
+  var rowData = seedVals.map(function(v, i){
+    return [stampOf(new Date(due - (i + 1) * INTERVAL * 1000)), v[0], v[1], v[2]];
+  });
+
+  function rowHTML(r, fresh){
+    return '<div class="frow' + (fresh ? ' fresh' : '') + '" role="row">'
+      + '<span class="f-t" role="cell">' + r[0] + '</span>'
+      + '<span class="f-amt" role="cell" aria-label="Gold distributed"><b>' + r[1] + '</b><span>PAXG</span></span>'
+      + '<span class="f-v" role="cell" aria-label="Cost">' + r[2] + '</span>'
+      + '<span class="f-w" role="cell" aria-label="Wallets">' + r[3] + '</span>'
+      + '</div>';
+  }
+
+  var rowsEl = document.getElementById('rows');
+  if (rowsEl){
+    rowsEl.innerHTML = rowData.map(function(r){ return rowHTML(r, false); }).join('');
+  }
+
+  /* ── countdown, derived from wall time so backgrounding cannot drift it ── */
+  var c1 = document.getElementById('clock'), c2 = document.getElementById('clock2');
+  function tick(){
+    var left = Math.max(0, Math.round((due - Date.now()) / 1000));
+    var txt = pad(Math.floor(left / 60)) + ':' + pad(left % 60);
+    if (c1) c1.textContent = txt;
+    if (c2) c2.textContent = txt;
+
+    if (left <= 0){
+      if (rowsEl){
+        // PAXG is one troy ounce, so a cycle moves a fraction of a token, not
+        // several. Sized against the spot price below so the amount and the
+        // dollar figure beside it stay consistent.
+        var PAXG_USD = 4008.73;
+        var amt = (0.21 + Math.sin(seq) * 0.12).toFixed(4);
+        var wallets = (1184 + (seq % 24)).toLocaleString();
+        var prev = rowsEl.firstElementChild;
+        if (prev) prev.classList.remove('fresh');   // only the newest row highlights
+        rowsEl.insertAdjacentHTML('afterbegin', rowHTML(
+          [stampOf(new Date(due)), amt, '$' + Math.round(amt * PAXG_USD).toLocaleString(), wallets],
+          !reduce
+        ));
+        while (rowsEl.children.length > 6) rowsEl.removeChild(rowsEl.lastElementChild);
+      }
+      seq++;
+      due = Date.now() + INTERVAL * 1000;   // reset from now: one row on return, not twelve
+    }
+  }
+  tick();
+  setInterval(tick, 1000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) tick(); });
+
+  /* ── count-up ── */
+  function countUp(el){
+    var to = parseFloat(el.dataset.to), dec = parseInt(el.dataset.dec || '0', 10);
+    var pre = el.dataset.pre || '', suf = el.dataset.suf || '';
+    var fmt = function(v){
+      return pre + v.toLocaleString(undefined, { minimumFractionDigits:dec, maximumFractionDigits:dec }) + suf;
+    };
+    if (reduce){ el.textContent = fmt(to); return; }
+    var start = null, dur = 1100;
+    function frame(ts){
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      el.textContent = fmt(to * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ── reveal; counters chain off the strip's own fade so the sweep is seen ── */
+  var targets = document.querySelectorAll('.rv, .stats, #chart');
+  function activate(el){
+    el.classList.add('in');
+    if (el.id === 'chart') el.classList.add('drawn');
+    if (el.classList.contains('stats')){
+      var counters = el.querySelectorAll('.v[data-to]');
+      var run = function(){ Array.prototype.forEach.call(counters, countUp); };
+      var anims = el.getAnimations ? el.getAnimations() : [];
+      var pending = anims.filter(function(a){ return a.playState === 'running'; });
+      if (pending.length) Promise.all(pending.map(function(a){ return a.finished; })).then(run).catch(run);
+      else run();
+    }
+  }
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (!e.isIntersecting) return;
+        activate(e.target);
+        io.unobserve(e.target);
+      });
+    }, { threshold:0.15, rootMargin:'0px 0px -40px 0px' });
+    Array.prototype.forEach.call(targets, function(el){ io.observe(el); });
+  } else {
+    Array.prototype.forEach.call(targets, activate);
+  }
+
+  /* ── faq ── */
+  var qs = document.querySelectorAll('.q');
+  Array.prototype.forEach.call(qs, function(q){
+    var btn = q.querySelector('button'), a = q.querySelector('.a');
+    btn.addEventListener('click', function(){
+      var wasOpen = q.classList.contains('open');
+      Array.prototype.forEach.call(qs, function(o){
+        o.classList.remove('open');
+        o.querySelector('.a').style.maxHeight = '';
+        o.querySelector('button').setAttribute('aria-expanded', 'false');
+      });
+      if (!wasOpen){
+        q.classList.add('open');
+        a.style.maxHeight = a.scrollHeight + 'px';
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
+  /* ── live protocol data ──────────────────────────────────────────────
+     The page ships in its pre-launch state and STAYS there unless the API
+     positively confirms a deployed protocol that has actually run a cycle.
+     Every failure mode — not configured, unreachable, deployed-but-never-run,
+     malformed response — leaves the honest placeholder copy untouched.
+     Zeros from an unconfigured contract must never render as measurements. */
+  (function liveData(){
+    fetch('/api/stats', { headers: { accept: 'application/json' } })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(s){
+        if (!s || s.deployed !== true || s.hasRun !== true) return;   // stay pre-launch
+        if (typeof s.cycles !== 'number' || s.cycles < 1) return;
+        if (typeof s.holders !== 'number' || typeof s.goldDistributed !== 'number') return;
+
+        var badge = document.querySelector('.badge');
+        if (badge) badge.innerHTML = '<span class="dot"></span> Live on Robinhood Chain';
+
+        var note = document.querySelector('.stats-note');
+        if (note){
+          note.textContent = s.goldDistributed.toLocaleString(undefined, { maximumFractionDigits: 2 })
+            + ' PAXG distributed to ' + s.holders.toLocaleString()
+            + ' holders across ' + s.cycles.toLocaleString() + ' cycles.';
+        }
+
+        var feedTitle = document.querySelector('.feed-top b');
+        if (feedTitle) feedTitle.textContent = 'Live distributions';
+        var feedTag = document.querySelector('.feed-top .tag');
+        if (feedTag) feedTag.textContent = 'Live from Robinhood Chain';
+
+        return fetch('/api/distributions?limit=6', { headers: { accept: 'application/json' } })
+          .then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(d){
+            if (!d || d.deployed !== true || !Array.isArray(d.distributions) || !d.distributions.length) return;
+            if (!rowsEl) return;
+
+            // The Distributed event carries (cycle, amount, eligibleSupply) and
+            // NO wallet count and NO dollar cost. Relabel the columns to what
+            // the chain actually reports rather than leaving the placeholder
+            // headers and filling them with the nearest-looking number.
+            var heads = document.querySelectorAll('.fhead .tag');
+            var live = ['Cycle', 'Gold distributed', 'Eligible supply', ''];
+            for (var i = 0; i < heads.length && i < live.length; i++) heads[i].textContent = live[i];
+
+            // The section copy promises cost and wallet counts, which the chain
+            // does not report. Bring the heading in line with the real columns
+            // rather than leaving a caption that contradicts the table under it.
+            var feedSec = document.getElementById('feed');
+            var h2 = feedSec && feedSec.querySelector('.head h2');
+            var p2 = feedSec && feedSec.querySelector('.head .sub');
+            if (h2) h2.textContent = 'Every payout, on-chain.';
+            if (p2) p2.textContent = 'Each row is one distribution: the cycle, the gold bought, and the supply it was shared across.';
+
+            rowsEl.innerHTML = d.distributions.map(function(x){
+              return '<div class="frow" role="row">'
+                + '<span class="f-t" role="cell">cycle ' + x.cycle + '</span>'
+                + '<span class="f-amt" role="cell" aria-label="Gold distributed"><b>'
+                +   Number(x.gold).toFixed(4) + '</b><span>PAXG</span></span>'
+                + '<span class="f-v" role="cell" aria-label="Eligible supply">'
+                +   Number(x.eligibleSupply).toLocaleString(undefined, { maximumFractionDigits: 0 })
+                + '</span>'
+                + '<span class="f-w" role="cell"></span>'
+                + '</div>';
+            }).join('');
+          });
+      })
+      .catch(function(){ /* stay pre-launch — silence is the safe outcome */ });
+  })();
+
+  /* an open panel's pixel height goes stale on rotate or a late font load */
+  var lastW = window.innerWidth, resizeT;
+  function syncOpenFaq(){
+    var open = document.querySelector('.q.open .a');
+    if (!open) return;
+    var prev = open.style.transition;
+    open.style.transition = 'none';
+    open.style.maxHeight = open.scrollHeight + 'px';
+    void open.offsetHeight;
+    open.style.transition = prev;
+  }
+  window.addEventListener('resize', function(){
+    if (window.innerWidth === lastW) return;   // mobile URL bar fires resize with no width change
+    lastW = window.innerWidth;
+    clearTimeout(resizeT);
+    resizeT = setTimeout(syncOpenFaq, 120);
+  });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncOpenFaq);
+})();
+</script>
+</body>
+</html>

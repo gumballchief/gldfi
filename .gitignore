@@ -1,0 +1,11 @@
+node_modules/
+protocol/node_modules/
+protocol/artifacts/
+protocol/cache/
+*.log
+.env
+.env.*
+.vercel/
+protocol/airdrop/state.json
+protocol/airdrop/recipients.json
+chk.js

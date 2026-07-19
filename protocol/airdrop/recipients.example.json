@@ -1,0 +1,7 @@
+{
+  "_comment": "Copy this to recipients.json and put the real wallet addresses in. Max 1000. Duplicates, bad checksums and the zero address are rejected before anything sends.",
+  "recipients": [
+    "0x0000000000000000000000000000000000000001",
+    "0x0000000000000000000000000000000000000002"
+  ]
+}

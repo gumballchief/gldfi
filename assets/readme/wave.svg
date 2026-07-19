@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="120" viewBox="0 0 1200 120">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFE0A7"/>
+      <stop offset="35%" stop-color="#E4BB79"/>
+      <stop offset="100%" stop-color="#C89A5C"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="120" rx="14" fill="url(#g)"/>
+  <g opacity="0.35" fill="#14110C">
+    <circle cx="80" cy="60" r="3"><animate attributeName="cy" values="60;44;60" dur="4s" repeatCount="indefinite"/></circle>
+    <circle cx="300" cy="52" r="3"><animate attributeName="cy" values="52;70;52" dur="5s" repeatCount="indefinite"/></circle>
+    <circle cx="600" cy="64" r="3"><animate attributeName="cy" values="64;46;64" dur="3.6s" repeatCount="indefinite"/></circle>
+    <circle cx="900" cy="50" r="3"><animate attributeName="cy" values="50;68;50" dur="4.6s" repeatCount="indefinite"/></circle>
+    <circle cx="1120" cy="62" r="3"><animate attributeName="cy" values="62;46;62" dur="4.2s" repeatCount="indefinite"/></circle>
+  </g>
+  <rect width="300" height="120" fill="url(#sheen)" transform="skewX(-20)">
+    <animateTransform attributeName="transform" type="translate" additive="sum"
+      values="-360 0; 1560 0" dur="3.4s" repeatCount="indefinite"/>
+  </rect>
+</svg>

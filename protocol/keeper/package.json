@@ -1,0 +1,15 @@
+{
+  "name": "midasfi-keeper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Off-chain service that drives the MidasFi distribution cycle",
+  "main": "keeper.js",
+  "scripts": {
+    "start": "node keeper.js",
+    "once": "RUN_ONCE=1 node keeper.js",
+    "dry": "DRY_RUN=1 RUN_ONCE=1 node keeper.js"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0"
+  }
+}
