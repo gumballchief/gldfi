@@ -107,9 +107,11 @@ consumed amount **up** (`Math.ceilDiv`). Regression test is named for it.
 ## Not proven, and it matters
 
 - **Nothing is audited.**
-- **Whether Bags accepts a contract as a fee claimer is unconfirmed.** If it does,
-  register the treasury and fees are untouchable. If it does not, fees land in a
-  wallet first and the trust story changes — the site copy must then say so.
+- **The Bags fee claimer is a wallet (confirmed).** Fees land in a team-operated
+  wallet and are forwarded manually. That wallet is the single point of trust in
+  the flow; the mitigation is that every hop is public on-chain. The site says
+  this plainly. The contract-claimer route in `MidasTreasury.claimFees()` stays
+  ready if Bags ever supports it.
 - **`MockGLD` and `MockRouter` are placeholders.** Real deployment needs the actual
   gold token on Robinhood Chain and an adapter over a venue that genuinely has
   liquidity. Thin liquidity means the treasury's buys move the price against
