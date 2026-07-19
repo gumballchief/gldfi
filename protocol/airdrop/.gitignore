@@ -1,3 +1,4 @@
 state.json
 recipients.json
 .env
+*.keystore.json

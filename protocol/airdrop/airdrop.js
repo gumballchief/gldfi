@@ -23,6 +23,10 @@
  *   the wallet actually holds among all recipients. No fees, no airdrop —
  *   there is no fixed number to fall short of.
  *
+ * SETUP (once):
+ *   node make-keystore.js           # encrypt the wallet key with a password
+ *   TOKEN_CA=0x... node holders.js  # build recipients.json from on-chain data
+ *
  * Usage:
  *   node airdrop.js                 # dry run — shows exactly what it would do
  *   node airdrop.js --live          # actually sends
@@ -35,6 +39,11 @@ const path = require("path");
 
 const CFG = {
   rpcUrl: process.env.RPC_URL || "https://ethereum-rpc.publicnode.com",
+  // Key handling, safest first:
+  //   1. airdrop.keystore.json (made by make-keystore.js) — encrypted on disk,
+  //      password asked at runtime, key exists only in memory. USE THIS.
+  //   2. AIRDROP_PRIVATE_KEY env — plaintext, LOCAL TESTING ONLY.
+  keystore: process.env.AIRDROP_KEYSTORE || require("path").join(__dirname, "airdrop.keystore.json"),
   privateKey: process.env.AIRDROP_PRIVATE_KEY || null,
 
   // PAX Gold on Ethereum mainnet. Verified: name() = "Paxos Gold", symbol() = "PAXG".
@@ -144,7 +153,6 @@ function validateConfig() {
     else { try { ethers.parseUnits(CFG.amountPerWallet, 18); }
            catch { problems.push(`AMOUNT_PER_WALLET "${CFG.amountPerWallet}" is not a valid number`); } }
   }
-  if (CFG.live && !CFG.privateKey) problems.push("AIRDROP_PRIVATE_KEY is required with --live");
 
   if (problems.length) {
     for (const p of problems) error("invalid config", { problem: p });
@@ -155,6 +163,36 @@ function validateConfig() {
 // ---------------------------------------------------------------------------
 // Sending
 // ---------------------------------------------------------------------------
+
+function promptHidden(question) {
+  return new Promise((resolve) => {
+    const readline = require("readline");
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: process.stdin.isTTY === true });
+    const orig = rl._writeToOutput ? rl._writeToOutput.bind(rl) : null;
+    rl.question(question, (ans) => { rl.close(); process.stdout.write("\n"); resolve(ans.trim()); });
+    if (orig) rl._writeToOutput = (str) => { orig(str.includes(question) ? str : "*"); };
+  });
+}
+
+/** Encrypted keystore first; plaintext env only as a loudly-flagged fallback. */
+async function getSigner(provider) {
+  if (fs.existsSync(CFG.keystore)) {
+    const pw = await promptHidden(`password for ${path.basename(CFG.keystore)} (hidden): `);
+    try {
+      const w = await ethers.Wallet.fromEncryptedJson(fs.readFileSync(CFG.keystore, "utf8"), pw);
+      info("unlocked keystore", { address: w.address });
+      return w.connect(provider);
+    } catch {
+      throw new Error("wrong password (key stays encrypted on disk — nothing leaked)");
+    }
+  }
+  if (CFG.privateKey) {
+    warn("using a PLAINTEXT key from the environment — fine on a local test chain, never for real funds. Run make-keystore.js instead.");
+    return new ethers.Wallet(CFG.privateKey, provider);
+  }
+  if (CFG.live) throw new Error("no key: run `node make-keystore.js` once to create the encrypted keystore");
+  return null; // dry run without a wallet
+}
 
 async function waitTx(txPromise, label) {
   const tx = await txPromise;
@@ -217,7 +255,7 @@ async function main() {
     throw new Error(`connected to chain ${net.chainId} but expected ${CFG.expectedChainId} — refusing to send`);
   }
 
-  const signer = CFG.privateKey ? new ethers.Wallet(CFG.privateKey, provider) : null;
+  const signer = await getSigner(provider);
   const token = new ethers.Contract(CFG.token, ERC20, signer || provider);
 
   // Confirm the token really is what we think it is before moving anything.

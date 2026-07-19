@@ -146,7 +146,10 @@ delivers gold as **PAXG on Ethereum mainnet** with a standalone runner:
 `airdrop/airdrop.js`. Dry-run by default, crash-safe (`state.json` records every
 send before the next starts), refuses bad recipient lists and gas spikes, and in
 its default `split` mode divides only what the wallet actually holds — the
-payout is earned fee income, never a promised number. The on-chain treasury
+payout is earned fee income, never a promised number. The recipient list is
+built from on-chain holder data (`holders.js`), and the wallet key is an
+encrypted keystore unlocked by password at runtime (`make-keystore.js`) — no
+plaintext key ever touches disk. The on-chain treasury
 route above becomes usable the day real gold is issued on Robinhood Chain.
 
 ## Parameters
