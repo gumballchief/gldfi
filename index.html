@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>document.documentElement.classList.add('js')</script>
 <title>Gold — a gold distribution protocol on Robinhood Chain</title>
-<meta name="description" content="A 1% share of every trade is collected in WETH, spent on tokenized gold, and distributed to holders every 15 minutes. Pre-launch — contracts are not yet deployed.">
+<meta name="description" content="A 1% share of every trade is collected in WETH, spent on tokenized gold, and distributed to holders every 15 minutes.">
 <link rel="icon" href="assets/logo/mark-trim.png">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gold — a gold distribution protocol on Robinhood Chain">
@@ -439,6 +439,12 @@ html.js .rv.in .step:nth-child(4){animation-delay:.24s}
   html.js .chart .ln{stroke-dashoffset:0}
   html.js .chart .ar{opacity:1}
 }
+
+.ca-copy{display:flex;flex-direction:column;gap:5px;margin:0 auto 22px;max-width:min(92vw,560px);padding:16px 20px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);cursor:pointer;text-align:left;transition:border-color .2s var(--ease)}
+.ca-copy:hover{border-color:var(--gold-line)}
+.ca-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2)}
+.ca-addr{font-family:'IBM Plex Mono',monospace;font-size:clamp(11px,2.7vw,15px);font-weight:500;color:var(--text);word-break:break-all}
+.ca-hint{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--gold-ink)}
 </style>
 </head>
 <body>
@@ -480,7 +486,7 @@ html.js .rv.in .step:nth-child(4){animation-delay:.24s}
 <section class="hero">
   <div class="glow" aria-hidden="true"></div>
   <div class="shell hero-in">
-    <span class="badge tag fade-in"><span class="dot"></span> Pre-launch — contracts not yet deployed</span>
+    <span class="badge tag fade-in"><span class="dot"></span> Live on Robinhood Chain</span>
 
     <h1>
       <span class="rise"><span>Get paid in gold,</span></span>
@@ -736,14 +742,19 @@ html.js .rv.in .step:nth-child(4){animation-delay:.24s}
 <!-- ── cta ─────────────────────────────────────────── -->
 <section class="shell" id="buy">
   <div class="cta rv">
-    <span class="tag">Get started</span>
+    <span class="tag">Now live · Robinhood Chain</span>
     <h2>Start earning gold.</h2>
     <p class="sub">Hold 50,000 Gold and the next distribution includes you.</p>
+    <button type="button" class="ca-copy" onclick="navigator.clipboard&&navigator.clipboard.writeText('0x59e026843639c75c95334ad87e8b5df5d03629a0').then(()=>{var h=this.querySelector('.ca-hint');h.textContent='copied ✓';setTimeout(function(){h.textContent='tap to copy';},1600);})">
+      <span class="ca-label">Official contract · Robinhood Chain</span>
+      <span class="ca-addr">0x59e026843639c75c95334ad87e8b5df5d03629a0</span>
+      <span class="ca-hint">tap to copy</span>
+    </button>
     <div class="cta-row">
-      <span class="btn btn-gold" aria-disabled="true">Buy Gold <span class="ar">→</span></span>
+      <a class="btn btn-gold" href="https://robinhoodchain.blockscout.com/token/0x59e026843639c75c95334ad87e8b5df5d03629a0" target="_blank" rel="noopener">View on explorer <span class="ar">→</span></a>
       <a href="#how" class="btn btn-ghost">How it works</a>
     </div>
-    <p class="cta-note">POOL GOES LIVE AT LAUNCH</p>
+    <p class="cta-note">Only ever trust this contract address. Copycat tokens exist on this chain.</p>
   </div>
 </section>
 
