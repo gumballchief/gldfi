@@ -262,7 +262,20 @@ async function main() {
   // Confirm the token really is what we think it is before moving anything.
   const [name, symbol, decimals] = await Promise.all([token.name(), token.symbol(), token.decimals()]);
 
-  const recipients = loadRecipients();
+  // Load the recipient set. With TOKEN_CA set, pull it straight from the chain
+  // (auto-refreshed every cycle after this); otherwise use a manual recipients.json.
+  let recipients;
+  if (process.env.TOKEN_CA) {
+    const { recipients: fresh } = await buildRecipients();
+    recipients = fresh.map((a) => ethers.getAddress(a));
+    info("loaded qualifying holders from chain", { count: recipients.length, minGold: Number(process.env.THRESHOLD || 50000) });
+  } else {
+    recipients = loadRecipients();
+  }
+  if (recipients.length === 0) {
+    info("no wallets hold the minimum yet — nothing to airdrop right now; rerun once holders qualify", { minGold: Number(process.env.THRESHOLD || 50000) });
+    return;
+  }
   const state = loadState();
   const remaining = recipients.filter((r) => !state.paid[r]);
 
