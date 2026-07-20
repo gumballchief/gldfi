@@ -325,11 +325,6 @@ async function main() {
     estimatedMinutes: Math.ceil(remaining.length / CFG.perBatch) * (CFG.intervalMs / 60000),
   });
 
-  if (remaining.length === 0) {
-    info("every recipient has already been paid — nothing to do");
-    return;
-  }
-
   // Can we actually afford the whole run?
   const needed = amount * BigInt(remaining.length);
   if (signer) {
@@ -372,15 +367,50 @@ async function main() {
     }
   };
 
+  // Pick n distinct random entries (Fisher-Yates on a copy).
+  const pickRandom = (arr, n) => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a.slice(0, n);
+  };
+
+  // When there are NO new holders to pay this cycle, give the wallet's current
+  // PAXG to a random handful of existing holders instead of sitting idle. These
+  // sends are intentionally repeatable and are NOT recorded in state.paid, so
+  // they never disturb the pay-each-new-holder-once ledger above. If the wallet
+  // is empty it simply waits for the next top-up.
+  const randomReairdrop = async () => {
+    const pool = Array.from(new Set([...Object.keys(state.paid), ...remaining]));
+    if (pool.length === 0) { info("no holders yet — waiting"); return; }
+    if (!CFG.live) { info("dry run — no new holders; would re-airdrop to random holders when funded", { pool: pool.length }); return; }
+    if (!signer) return;
+    const balance = await token.balanceOf(signer.address);
+    if (balance === 0n) { info("no new holders and the wallet is empty — waiting for a top-up"); return; }
+    const gas = await gasOk(provider);
+    if (!gas.ok) return;
+    const n = Math.min(CFG.perBatch, pool.length);
+    const amount = balance / BigInt(n);
+    if (amount === 0n) { info("balance too small to re-airdrop", { holds: `${ethers.formatUnits(balance, ctx.decimals)} ${symbol}` }); return; }
+    const picks = pickRandom(pool, n);
+    info("no new holders — re-airdropping to random holders", { count: n, perWallet: `${ethers.formatUnits(amount, ctx.decimals)} ${symbol}`, gwei: gas.gwei.toFixed(3) });
+    for (const to of picks) {
+      try {
+        const rec = await payOne(ctx, to, amount);
+        info("re-airdropped", { to, delivered: `${ethers.formatUnits(rec.delivered, ctx.decimals)} ${symbol}`, tx: rec.tx });
+      } catch (e) {
+        error("re-airdrop send failed — halting this cycle", { to, err: e.shortMessage || e.message });
+        return;
+      }
+    }
+  };
+
   const runBatch = async () => {
     await refreshHolders();
     const batch = remaining.slice(cursor, cursor + CFG.perBatch);
     if (batch.length === 0) {
-      // Everyone known is paid. If auto-refresh is on, stay alive to catch new
-      // holders next cycle; otherwise the run is genuinely done.
-      if (process.env.TOKEN_CA && !CFG.once) { info("all current recipients paid — watching for new holders"); return; }
-      info("airdrop complete — all recipients paid", { total: remaining.length });
-      process.exit(0);
+      // No new holders to pay this cycle -> re-airdrop to random existing holders.
+      await randomReairdrop();
+      return;
     }
 
     const gas = await gasOk(provider);
@@ -413,12 +443,8 @@ async function main() {
     }
 
     cursor += batch.length;
-    info("batch done", { paidSoFar: Object.keys(state.paid).length, remaining: remaining.length - cursor });
-
-    if (cursor >= remaining.length && !(process.env.TOKEN_CA && !CFG.once)) {
-      info("airdrop complete — all recipients paid", { total: remaining.length });
-      process.exit(0);
-    }
+    info("batch done", { paidThisCycle: batch.length, newHoldersRemaining: Math.max(0, remaining.length - cursor) });
+    // No exit: the next cycle pays new holders, or re-airdrops randomly if none.
   };
 
   await runBatch();
