@@ -15,13 +15,13 @@ contract MockWETH is ERC20 {
  * @notice Stand-in for the token Bags deploys.
  *
  * The important detail is what it does NOT do: it has no hook into the
- * distributor. Bags mints this contract, so MidasFi cannot make it report
+ * distributor. Bags mints this contract, so Gold cannot make it report
  * balance changes. Testing against a plain ERC-20 is the point — it proves the
  * distributor's eligibility tracking works purely from keeper-driven `resync`,
  * which is the only mechanism that will exist in production.
  */
 contract MockBagsToken is ERC20 {
-    constructor(address holder, uint256 supply) ERC20("MidasFi", "MIDASFI") {
+    constructor(address holder, uint256 supply) ERC20("Gold", "GOLD") {
         _mint(holder, supply);
     }
 }

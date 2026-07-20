@@ -19,7 +19,7 @@ const SEL = {
   eligibleSupply: "0x6ade07b0",
   carry: "0xf02ec765",
   threshold: "0x42cde4e8",
-  // MidasTreasury (Bags/WETH model). The old totalEthReceived/Converted
+  // GoldTreasury (Bags/WETH model). The old totalEthReceived/Converted
   // selectors died with the native-ETH treasury — querying them would revert
   // and silently pin the site to its pre-launch state.
   totalWethClaimed: "0xd6a61f65",

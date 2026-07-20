@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * MidasFi keeper — Bags launch model
+ * Gold keeper — Bags launch model
  * ==================================
  * The off-chain service that actually runs the protocol. The contracts are
  * passive: they hold fee WETH forever unless something tells them to convert it
@@ -179,14 +179,14 @@ async function connect() {
     provider,
     signer,
     deployment: d,
-    dist: new ethers.Contract(c.MidasDistributor, ABI.distributor, signer),
-    treasury: new ethers.Contract(c.MidasTreasury, ABI.treasury, signer),
-    token: new ethers.Contract(c.MidasToken || c.BagsToken, ABI.erc20, provider),
+    dist: new ethers.Contract(c.GoldDistributor, ABI.distributor, signer),
+    treasury: new ethers.Contract(c.GoldTreasury, ABI.treasury, signer),
+    token: new ethers.Contract(c.GoldToken || c.BagsToken, ABI.erc20, provider),
     weth: new ethers.Contract(c.WETH || c.MockWETH, ABI.erc20, provider),
     router: c.Router || c.MockRouter
       ? new ethers.Contract(c.Router || c.MockRouter, ABI.router, signer)
       : null,
-    treasuryAddr: c.MidasTreasury,
+    treasuryAddr: c.GoldTreasury,
   };
 }
 

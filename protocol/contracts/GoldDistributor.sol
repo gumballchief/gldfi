@@ -8,8 +8,8 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
- * @title MidasDistributor
- * @notice Accrues tokenized gold (GLD) to MidasFi holders pro-rata and pays it out.
+ * @title GoldDistributor
+ * @notice Accrues tokenized gold (GLD) to Gold holders pro-rata and pays it out.
  *
  * THE CORE PROBLEM THIS SOLVES
  * ---------------------------
@@ -33,7 +33,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
  *
  * ELIGIBILITY
  * -----------
- * Only wallets holding >= `threshold` MidasFi accrue, and `eligibleSupply` tracks
+ * Only wallets holding >= `threshold` Gold accrue, and `eligibleSupply` tracks
  * the sum of exactly those balances. A wallet that falls below the threshold
  * stops accruing immediately but keeps everything it already earned — gold that
  * has been credited is never clawed back.
@@ -47,7 +47,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
  * trade — a round trip costs ~6% of position value, while one cycle pays out a
  * tiny fraction of a percent. The fee that funds the protocol also defends it.
  */
-contract MidasDistributor is Ownable, ReentrancyGuard {
+contract GoldDistributor is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     /// @dev Fixed-point scale for accGoldPerShare. Sized so that
@@ -55,10 +55,10 @@ contract MidasDistributor is Ownable, ReentrancyGuard {
     ///      1e21 (1000 GLD) * 1e36 = 1e57, against a uint256 ceiling of ~1.15e77.
     uint256 private constant SCALE = 1e36;
 
-    IERC20 public immutable midasToken; // MidasFi — the token you hold
+    IERC20 public immutable midasToken; // Gold — the token you hold
     IERC20 public immutable gld;       // tokenized SPDR Gold Shares — what you get paid in
 
-    /// @notice Minimum MidasFi balance for a wallet to accrue.
+    /// @notice Minimum Gold balance for a wallet to accrue.
     uint256 public threshold;
 
     /// @notice Address permitted to call `distribute` (the treasury).
@@ -167,7 +167,7 @@ contract MidasDistributor is Ownable, ReentrancyGuard {
     // ---------------------------------------------------------------------
 
     /**
-     * @notice Called by the MidasFi token after every transfer so this contract
+     * @notice Called by the Gold token after every transfer so this contract
      *         can re-derive eligibility for the two wallets involved.
      * @dev Deliberately strict: if this reverts, the transfer reverts. Silently
      *      swallowing an accounting failure would let balances and

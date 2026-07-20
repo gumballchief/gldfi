@@ -6,7 +6,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-interface IMidasDistributor {
+interface IGoldDistributor {
     function distribute(uint256 amount) external;
     function eligibleSupply() external view returns (uint256);
 }
@@ -26,12 +26,12 @@ interface IWethToGoldRouter {
 }
 
 /**
- * @title MidasTreasury
+ * @title GoldTreasury
  * @notice Collects the protocol's WETH fee share and turns it into gold for holders.
  *
  * WHY WETH AND NOT NATIVE ETH
  * ---------------------------
- * MidasFi launches through Bags on Robinhood Chain. Bags charges 2% on the WETH
+ * Gold launches through Bags on Robinhood Chain. Bags charges 2% on the WETH
  * leg of every trade and splits it evenly — 1% to the Bags protocol, 1% to the
  * token's registered fee claimers — accrued as WETH inside a per-token
  * `BagsFeeShare` contract. The money therefore arrives as an ERC-20, not as
@@ -54,12 +54,12 @@ interface IWethToGoldRouter {
  * distributor, and has no owner path to withdraw the WETH or the gold. The only
  * discretion an operator has is *when* to convert, and what slippage to accept.
  */
-contract MidasTreasury is Ownable, ReentrancyGuard {
+contract GoldTreasury is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable weth;
     IERC20 public immutable gold;
-    IMidasDistributor public immutable distributor;
+    IGoldDistributor public immutable distributor;
 
     /// @notice The Bags fee-share contract for this token. Set after launch,
     ///         because Bags deploys it and its address is not known in advance.
@@ -100,7 +100,7 @@ contract MidasTreasury is Ownable, ReentrancyGuard {
         }
         weth = IERC20(_weth);
         gold = IERC20(_gold);
-        distributor = IMidasDistributor(_distributor);
+        distributor = IGoldDistributor(_distributor);
     }
 
     /**

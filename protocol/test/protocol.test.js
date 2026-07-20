@@ -7,7 +7,7 @@ const THRESHOLD = E(50_000);
 const SUPPLY = E(1_000_000_000);          // Bags mints 1e9 with 18 decimals
 const GOLD_PER_WETH = E(1);               // keeps the arithmetic checkable by hand
 
-describe("MidasFi protocol (Bags launch model)", function () {
+describe("Gold protocol (Bags launch model)", function () {
   async function deploy() {
     const [owner, alice, bob, carol, dave, keeper, pool] = await ethers.getSigners();
 
@@ -19,10 +19,10 @@ describe("MidasFi protocol (Bags launch model)", function () {
     const token = await (await ethers.getContractFactory("MockBagsToken"))
       .deploy(owner.address, SUPPLY);
 
-    const dist = await (await ethers.getContractFactory("MidasDistributor")).deploy(
+    const dist = await (await ethers.getContractFactory("GoldDistributor")).deploy(
       await token.getAddress(), await gold.getAddress(), THRESHOLD, owner.address
     );
-    const treasury = await (await ethers.getContractFactory("MidasTreasury")).deploy(
+    const treasury = await (await ethers.getContractFactory("GoldTreasury")).deploy(
       await weth.getAddress(), await gold.getAddress(), await dist.getAddress(), owner.address
     );
     const router = await (await ethers.getContractFactory("MockRouter")).deploy(
@@ -341,7 +341,7 @@ describe("MidasFi protocol (Bags launch model)", function () {
 
     it("refuses to claim before the Bags fee-share address is set", async function () {
       const { weth, gold, dist, owner } = await loadFixture(deploy);
-      const fresh = await (await ethers.getContractFactory("MidasTreasury")).deploy(
+      const fresh = await (await ethers.getContractFactory("GoldTreasury")).deploy(
         await weth.getAddress(), await gold.getAddress(), await dist.getAddress(), owner.address
       );
       await expect(fresh.claimFees()).to.be.revertedWithCustomError(fresh, "FeeShareNotSet");

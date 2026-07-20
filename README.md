@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="assets/logo/mark-trim.png" width="84" alt="MidasFi logo"/>
+<img src="assets/logo/mark-trim.png" width="84" alt="Gold logo"/>
 
-# MidasFi
+# Gold
 
 **Hold the token. Get paid in real gold.**
 
@@ -19,16 +19,16 @@
 
 ## What it does
 
-Every MidasFi trade on [Bags](https://bags.fm) carries a 2% fee — **1% goes to holders as gold**.
+Every Gold trade on [Bags](https://bags.fm) carries a 2% fee — **1% goes to holders as gold**.
 The fee accrues in WETH, buys **PAX Gold** (one token = one vaulted troy ounce, issued by Paxos),
-and gets sent to every wallet holding **50,000+ MidasFi**. No claiming. No staking.
+and gets sent to every wallet holding **50,000+ Gold**. No claiming. No staking.
 
 ```mermaid
 flowchart LR
     A["Trade on Bags\n(Robinhood Chain)"] -->|"2% fee in WETH"| B["BagsFeeShare\ncontract"]
-    B -->|"claimFees()"| C["MidasTreasury"]
+    B -->|"claimFees()"| C["GoldTreasury"]
     C -->|"buys"| D["PAX Gold\n(Ethereum)"]
-    D -->|"pro-rata, batched"| E["Every holder\n≥ 50,000 MidasFi"]
+    D -->|"pro-rata, batched"| E["Every holder\n≥ 50,000 Gold"]
 ```
 
 ## What's in this repo
@@ -37,7 +37,7 @@ flowchart LR
 |---|---|---|
 | 🌐 Landing site | `index.html` | Live at [midasfi.net](https://midasfi.net) — static, zero build step |
 | 📡 Read API | `api/` | Dependency-free chain reader; refuses to show fake numbers |
-| 📜 Contracts | `protocol/contracts/` | `MidasDistributor` + `MidasTreasury`, Solidity 0.8.26 |
+| 📜 Contracts | `protocol/contracts/` | `GoldDistributor` + `GoldTreasury`, Solidity 0.8.26 |
 | 🤖 Keeper | `protocol/keeper/` | Runs the cycle: sync holders → claim WETH → buy gold → pay |
 | 🪂 Airdrop | `protocol/airdrop/` | Crash-safe PAXG sender — splits **earned** fees, never promises fixed amounts |
 | ✅ Tests | `protocol/test/` | 25 passing, including the two bugs below |

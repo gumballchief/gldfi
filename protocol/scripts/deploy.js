@@ -8,7 +8,7 @@ const E = (n) => ethers.parseEther(String(n));
  * Local deployment of the Bags launch model.
  *
  * In production Bags deploys the token, the bonding curve and the fee-share
- * contract; MidasFi only deploys the distributor and the treasury and then
+ * contract; Gold only deploys the distributor and the treasury and then
  * points them at the Bags addresses. MockBagsToken / MockBagsFeeShare / MockWETH
  * / MockRouter stand in for those here so the whole loop runs locally.
  */
@@ -32,17 +32,17 @@ async function main() {
   await token.waitForDeployment();
   console.log("MockBagsToken     ", await token.getAddress());
 
-  const dist = await (await ethers.getContractFactory("MidasDistributor")).deploy(
+  const dist = await (await ethers.getContractFactory("GoldDistributor")).deploy(
     await token.getAddress(), await gold.getAddress(), E(50_000), deployer.address
   );
   await dist.waitForDeployment();
-  console.log("MidasDistributor  ", await dist.getAddress());
+  console.log("GoldDistributor  ", await dist.getAddress());
 
-  const treasury = await (await ethers.getContractFactory("MidasTreasury")).deploy(
+  const treasury = await (await ethers.getContractFactory("GoldTreasury")).deploy(
     await weth.getAddress(), await gold.getAddress(), await dist.getAddress(), deployer.address
   );
   await treasury.waitForDeployment();
-  console.log("MidasTreasury     ", await treasury.getAddress());
+  console.log("GoldTreasury     ", await treasury.getAddress());
 
   const router = await (await ethers.getContractFactory("MockRouter")).deploy(
     await weth.getAddress(), await gold.getAddress(), E(1)
@@ -64,16 +64,16 @@ async function main() {
   await (await dist.setExcluded(deployer.address, true)).wait();
 
   console.log("\nwired: BagsFeeShare -> treasury -> router -> distributor");
-  console.log("threshold:", ethers.formatEther(await dist.threshold()), "MidasFi");
+  console.log("threshold:", ethers.formatEther(await dist.threshold()), "Gold");
 
   const out = {
     chainId: Number(net.chainId),
     deployer: deployer.address,
     keeper: keeper.address,
     contracts: {
-      MidasDistributor: await dist.getAddress(),
-      MidasTreasury: await treasury.getAddress(),
-      MidasToken: await token.getAddress(),      // Bags token in production
+      GoldDistributor: await dist.getAddress(),
+      GoldTreasury: await treasury.getAddress(),
+      GoldToken: await token.getAddress(),      // Bags token in production
       WETH: await weth.getAddress(),
       Gold: await gold.getAddress(),
       Router: await router.getAddress(),

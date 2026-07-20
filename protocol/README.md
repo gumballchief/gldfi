@@ -1,6 +1,6 @@
-# MidasFi protocol — contracts
+# Gold protocol — contracts
 
-MidasFi launches through **Bags on Robinhood Chain**. Bags charges 2% on the
+Gold launches through **Bags on Robinhood Chain**. Bags charges 2% on the
 WETH leg of every trade and splits it evenly — 1% to the Bags protocol, 1% to
 this token's fee claimers. That 1% is what buys gold for holders.
 
@@ -18,8 +18,8 @@ and we do not collect the fee** — Bags does both.
 
 | Contract | What it does |
 |---|---|
-| `MidasTreasury.sol` | Claims WETH creator fees out of `BagsFeeShare`, converts them to gold, hands the gold to the distributor. No owner path to withdraw either asset. |
-| `MidasDistributor.sol` | Works out who is owed what, and pays them. Where the real complexity lives. |
+| `GoldTreasury.sol` | Claims WETH creator fees out of `BagsFeeShare`, converts them to gold, hands the gold to the distributor. No owner path to withdraw either asset. |
+| `GoldDistributor.sol` | Works out who is owed what, and pays them. Where the real complexity lives. |
 
 `MockWETH`, `MockGLD` (stands in for PAX Gold locally), `MockBagsToken`,
 `MockBagsFeeShare` and `MockRouter` stand in for the real things so the whole
@@ -57,7 +57,7 @@ Measured on 400 holders: **~62k gas each, so roughly 480 holders per 30M block.*
 Every holder is included with no artificial cap; the batch size and interval
 decide throughput, not a wallet limit.
 Raising the qualifying balance is the cheapest lever on that cost — it is
-currently **50,000 MidasFi**.
+currently **50,000 Gold**.
 
 ## Eligibility is keeper-driven, and that is not optional
 
@@ -110,7 +110,7 @@ consumed amount **up** (`Math.ceilDiv`). Regression test is named for it.
 - **The Bags fee claimer is a wallet (confirmed).** Fees land in a team-operated
   wallet and are forwarded manually. That wallet is the single point of trust in
   the flow; the mitigation is that every hop is public on-chain. The site says
-  this plainly. The contract-claimer route in `MidasTreasury.claimFees()` stays
+  this plainly. The contract-claimer route in `GoldTreasury.claimFees()` stays
   ready if Bags ever supports it.
 - **`MockGLD` and `MockRouter` are placeholders.** Real deployment needs the actual
   gold token on Robinhood Chain and an adapter over a venue that genuinely has
@@ -157,8 +157,8 @@ route above becomes usable the day real gold is issued on Robinhood Chain.
 | Parameter | Value | Changeable |
 |---|---|---|
 | Supply | 1,000,000,000 | No — fixed by Bags |
-| Trade fee | 2% (1% Bags, 1% MidasFi) | No — set by Bags |
-| Qualifying balance | 50,000 MidasFi | Yes — owner, on-chain |
+| Trade fee | 2% (1% Bags, 1% Gold) | No — set by Bags |
+| Qualifying balance | 50,000 Gold | Yes — owner, on-chain |
 | Interval | ~15 min | Off-chain, keeper-driven |
 | Asset bought | one gold token | No — immutable in the treasury |
 
