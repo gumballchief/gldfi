@@ -1,7 +1,1 @@
-{
-  "_comment": "Copy this to recipients.json and put the real wallet addresses in. Duplicates, bad checksums and the zero address are rejected before anything sends.",
-  "recipients": [
-    "0x0000000000000000000000000000000000000001",
-    "0x0000000000000000000000000000000000000002"
-  ]
-}
+{ "recipients": ["0x43452818156674fc2cae6d3b2e0625b3e75372c4"] }
